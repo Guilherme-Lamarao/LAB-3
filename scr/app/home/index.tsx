@@ -1,23 +1,16 @@
-
-//import { View, Image, TouchableOpacity, Text, ScrollView } from "react-native";
-import { View, Image, TouchableOpacity, Text, FlatList } from "react-native";
-
-import { Button } from '../components/Button';
-import { Input } from '../components/Input';
-import { Filter } from '../components/Filter';
-import { Item } from '../components/Item';
-
-
+import { FlatList, Image, Text, TouchableOpacity, View, Alert} from "react-native";
+import { Button } from "../components/Button";
+import { Filter } from "../components/Filter";
+import { Input } from "../components/Input";
+import { Item } from "../components/Item";
+import { FilterStatus } from "../types/FilterStatus";
+import { styles } from "./styles";
+import { useState } from "react";
 
 
-import { styles } from './styles';
-import { FilterStatus } from '../types/FilterStatus';
+const FILTER_STATUS: FilterStatus[] = [FilterStatus.PENDING, FilterStatus.DONE,];
 
-const FILTER_STATUS: FilterStatus[] = [
-	FilterStatus.PENDING, FilterStatus.DONE
-];
-
-const ITEMS = [
+/*const ITEMS = [
   {
     id: "1",
     status: FilterStatus.DONE,
@@ -32,117 +25,79 @@ const ITEMS = [
     id: "3",
     status: FilterStatus.PENDING,
     description: "5 caixas de leite",
-  }
-]
-
-//const ITEMS = Array.from({ length: 100 }).map((value, index) => index.toString())
+  },
+];*/
 
 export function Home() {
-  let filter = FilterStatus.DONE;
-  /*return (
-    <View style={styles.container}>
-      <Image 
-        source={require("../assets/logo.png")} 
-        style={styles.logo} 
-      />   
+  const [filter, setFilter] = useState(FilterStatus.DONE);
+  const [description, setDescription] = useState("");
+  const [items, setItems] = useState<any>([]);
 
-      <Input placeholder='O que você precisa' />
+ function handleAdd() {
+    if(!description.trim()){
+      return Alert.alert("Adicionar", "Informe a descrição para adicionar.")
+    }
 
-      
+    const newItem = {
+      id: Math.random().toString(36).substring(2),
+      description,
+      status: FilterStatus.PENDING,
+    }
 
-      <Button title="Adicionar" 
-	      activeOpacity={0.2} 
-	      onPress={() => console.log("Adicionar")} 
-	    />
-
-
-
-      <View style={styles.content}>
-	{/*<ScrollView>   
-	{Array.from({ length: 100 }).map((value, index) => {
-          
-          return (
-            <Item
-              key={index}
-              data={{ status: FilterStatus.DONE, description: "Café" }}
-              onStatus={() => console.log("Mudar o status")}
-              onRemove={() => console.log("Remover item")}
-            />)
-        })}
-  </ScrollView> }
-
-  <FlatList 
-    data={ITEMS}
-    keyExtractor={(item) => item.id}
-    renderItem={({ item }) => (
-      <Item
-        data={ item }
-        onStatus={() => console.log("Mudar o status")}
-        onRemove={() => console.log("Remover item")}
-      />
-        )}
-        showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={() => <Text style={styles.empty}>Nenhum item registrado.</Text>}
-    />
-    
-	    
-	  </View>  
-      
-    
-      
-    </View>
-
-    
-
-    
-  );*/
-
+    setItems([...items, newItem])
+    setDescription("")
+  }
+  
   return (
     <View style={styles.container}>
       <Image 
-        source={require("../assets/logo.png")} 
-        style={styles.logo} 
-      /> 
-      <View style={styles.form}>
-        <Input placeholder='O que você precisa?' />
+      source={require("../assets/logo.png")} 
+      style={styles.logo} />
 
-        <Button title="Adicionar" 
-          activeOpacity={0.2} 
-          onPress={() => console.log("Adicionar")} 
-        />
+      <View style={styles.form}>
+        <Input placeholder='O que você precisa?' 
+        value={description}
+        onChangeText={(value) => setDescription(value)}/>
+
+        <Button title="Adicionar"
+          activeOpacity={0.2}
+          onPress={handleAdd} 
+          />
       </View>
 
       <View style={styles.content}>
         <View style={styles.header}>
           {FILTER_STATUS.map((status) => (
-            <Filter key={status} status={status} isActive={status === filter} />
+            <Filter key={status} 
+            status={status} 
+            isActive={status === filter}
+            onPress={() => setFilter(status)}
+          />
           ))}
 
           <TouchableOpacity style={styles.clearButton}>
             <Text style={styles.clearText}>Limpar</Text>
           </TouchableOpacity>
         </View>
-        
-        <FlatList 
-          data={ITEMS}
+
+        <FlatList //lembrabr de tirar essa chave
+          data={items}//.filter((item) => item.status === filter)}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <Item
-              data={ item }
+              data={item}
               onStatus={() => console.log("Mudar o status")}
               onRemove={() => console.log("Remover item")}
             />
-              )}
-              showsVerticalScrollIndicator={false}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
-              contentContainerStyle={styles.listContent}
-              ListEmptyComponent={() => <Text style={styles.empty}>Nenhum item registrado.</Text>}
+          )}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={() => (
+            <Text style={styles.empty}>Nenhum item registrado.</Text>
+          )}
         />
       </View>
-
     </View>
-
   );
 }
